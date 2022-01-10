@@ -1,10 +1,6 @@
-from flask import (render_template, url_for, flash,
-                   redirect, request, abort, Blueprint, jsonify, json, session)
-from flask.wrappers import Response
-from flask_login import current_user, login_required
+from flask import (request, Blueprint, jsonify)
 from flaskblog import db
 from flaskblog.models import Comment, Post, token_required
-from flaskblog.posts.forms import PostForm, AddCommentForm
 from datetime import datetime
 from flaskblog.users.utils import get_a_post, get_all_posts
 
@@ -21,7 +17,6 @@ def new_post(current_user):
             content=request.json.get('content'),
             user_id=current_user
         )
-        print(new_post)
         db.session.add(new_post)
         db.session.commit()
         response_object = {
@@ -74,15 +69,13 @@ def update_post(a, post_id):
             'status': 'success',
             'message': 'Your post is updated.',
         }
-        return jsonify(response_object)
+    return jsonify(response_object)
 
 
 @posts.route("/post/<int:post_id>/delete", methods=['POST'])
 @token_required
 def delete_post(a, post_id):
     post = Post.query.filter_by(id=post_id).first()
-    # if post.author != current_user:
-    #     abort(403)
     db.session.delete(post)
     db.session.commit()
     response_object = {
@@ -114,7 +107,6 @@ def like_action(current_user, user_id, post_id, action):
 @token_required
 def delete_comment(a, comment_id):
     comments = Comment.query.filter_by(id=comment_id).first()
-    print(comments)
     db.session.delete(comments)
     db.session.commit()
     response_data = {
@@ -122,11 +114,3 @@ def delete_comment(a, comment_id):
         'message':'Your comment has been deleted!'
     }
     return jsonify(response_data)
-
-
-@posts.route('/followed_posts/', methods=['GET','POST'])
-@login_required
-def followed_posts():
-    page = request.args.get('page', 1, type=int)
-    posts = current_user.followed_posts().paginate(page=page, per_page=3)
-    return render_template('follow_user_posts.html', posts=posts)
