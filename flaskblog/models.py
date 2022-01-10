@@ -10,10 +10,10 @@ from functools import wraps
 import jwt
 
 
-# followers = db.Table('followers',
-#                     db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
-#                     db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
-# )
+followers = db.Table('followers',
+                    db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
+                    db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
+)
 
 
 @login_manager.user_loader
@@ -30,41 +30,28 @@ class User(db.Model, UserMixin):
     posts = db.relationship('Post', backref='author', lazy=True)
     liked = db.relationship('PostLike', foreign_keys='PostLike.user_id', backref='user', lazy='dynamic')
     comments = db.relationship('Comment', backref='user', lazy=True)
-    # followed = db.relationship('User',
-    #                            secondary=followers,
-    #                            primaryjoin=(followers.c.follower_id == id),
-    #                            secondaryjoin=(followers.c.followed_id == id),
-    #                            backref=db.backref('followers', lazy='dynamic'),
-    #                            lazy='dynamic')
+    followed = db.relationship('User',
+                               secondary=followers,
+                               primaryjoin=(followers.c.follower_id == id),
+                               secondaryjoin=(followers.c.followed_id == id),
+                               backref=db.backref('followers', lazy='dynamic'),
+                               lazy='dynamic')
 
-    # def get_reset_token(self, expires_sec=1800):
-    #     s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
-    #     return s.dumps({'user_id': self.id}).decode('utf-8')
+    def follow(self, user):
+        if not self.is_following(user):
+            self.followed.append(user)
+            return self
 
-    # def follow(self, user):
-    #     if not self.is_following(user):
-    #         self.followed.append(user)
-    #         return self
+    def unfollow(self, user):
+        if self.is_following(user):
+            self.followed.remove(user)
+            return self
 
-    # def unfollow(self, user):
-    #     if self.is_following(user):
-    #         self.followed.remove(user)
-    #         return self
+    def is_following(self, user):
+        return self.followed.filter(followers.c.followed_id == user.id).count() > 0
 
-    # def is_following(self, user):
-    #     return self.followed.filter(followers.c.followed_id == user.id).count() > 0
-
-    # def followed_posts(self):
-    #     return Post.query.join(followers, (followers.c.followed_id == Post.user_id)).filter(followers.c.follower_id == self.id).order_by(Post.date_posted.desc())
-
-    # @staticmethod
-    # def verify_reset_token(token):
-    #     s = Serializer(current_app.config['SECRET_KEY'])
-    #     try:
-    #         user_id = s.loads(token)['user_id']
-    #     except:
-    #         return None
-    #     return User.query.get(user_id)
+    def followed_posts(self):
+        return Post.query.join(followers, (followers.c.followed_id == Post.user_id)).filter(followers.c.follower_id == self.id).order_by(Post.date_posted.desc())
 
     def like_post(self, post):
         if not self.has_liked_post(post):
@@ -151,9 +138,6 @@ def token_required(f):
 
         if not token:
             return jsonify({'message': 'a valid token is missing'})
-
-        # if token != 'mytoken':
-        #     return jsonify({'message': 'Your token is wrong, wrong, wrong!!!'})
 
         try:
             data = jwt.decode(token, Config.SECRET_KEY)

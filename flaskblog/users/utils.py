@@ -1,13 +1,10 @@
 import os
 import secrets
 from PIL import Image
-from flask import url_for, current_app, request
-from flask.json import jsonify
+from flask import url_for, current_app
 from flask_mail import Message
-from flaskblog import mail, db
-from flaskblog.models import Post, User, PostLike
-import datetime
-from flask_login import current_user
+from flaskblog import mail
+from flaskblog.models import Post, User
 
 
 def save_picture(form_picture):
