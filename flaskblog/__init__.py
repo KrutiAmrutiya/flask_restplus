@@ -7,11 +7,11 @@ from flask_mail import Mail
 from flaskblog.config import Config
 from flask_migrate import Migrate
 from celery import Celery
-from flask_restplus import Api
+# from flask_restplus import Api
 
 
 # load_dotenv()
-api = Api()
+# api = Api()
 db = SQLAlchemy()
 migrate = Migrate()
 bcrypt = Bcrypt()
@@ -26,7 +26,7 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    api.init_app(app)
+    # api.init_app(app)
     db.init_app(app)
     bcrypt.init_app(app)
     migrate.init_app(app, db)

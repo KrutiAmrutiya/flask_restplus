@@ -7,7 +7,7 @@ from flaskblog.users.utils import get_a_post, get_all_posts
 posts = Blueprint('posts', __name__)
 
 
-@posts.route("/post/new", methods=['GET', 'POST'])
+@posts.route("/posts/new_post", methods=['GET', 'POST'])
 @token_required
 def new_post(current_user):
     post = Post.query.filter_by(title=request.json.get('title')).first()
@@ -26,7 +26,7 @@ def new_post(current_user):
         return jsonify(response_object)
 
 
-@posts.route("/post/<int:id>", methods=['GET', 'POST'])
+@posts.route("/posts/<int:id>", methods=['GET', 'POST'])
 @token_required
 def post(current_user, id):
     post = get_a_post(id)
@@ -49,13 +49,13 @@ def post(current_user, id):
     return post
 
 
-@posts.route("/post/list", methods=['GET', 'POST'])
+@posts.route("/posts/list", methods=['GET', 'POST'])
 def all_post():
     posts = get_all_posts()
     return jsonify(posts)
 
 
-@posts.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
+@posts.route("/posts/<int:post_id>/update", methods=['GET', 'POST'])
 @token_required
 def update_post(a, post_id):
     post = Post.query.filter_by(id=post_id).first()
@@ -72,7 +72,7 @@ def update_post(a, post_id):
     return jsonify(response_object)
 
 
-@posts.route("/post/<int:post_id>/delete", methods=['POST'])
+@posts.route("/posts/<int:post_id>/delete", methods=['POST'])
 @token_required
 def delete_post(a, post_id):
     post = Post.query.filter_by(id=post_id).first()
@@ -85,7 +85,7 @@ def delete_post(a, post_id):
     return jsonify(response_object)
 
 
-@posts.route('/like_unlike/<int:user_id>/<int:post_id>/<action>')
+@posts.route('/posts/like_unlike/<int:user_id>/<int:post_id>/<action>')
 @token_required
 def like_action(current_user, user_id, post_id, action):
     post = Post.query.filter_by(id=post_id).first()
@@ -103,7 +103,7 @@ def like_action(current_user, user_id, post_id, action):
     return jsonify(data)
 
 
-@posts.route("/post_comment/<int:comment_id>/delete", methods=['GET', 'POST'])
+@posts.route("/posts/post_comment/<int:comment_id>/delete", methods=['GET', 'POST'])
 @token_required
 def delete_comment(a, comment_id):
     comments = Comment.query.filter_by(id=comment_id).first()
