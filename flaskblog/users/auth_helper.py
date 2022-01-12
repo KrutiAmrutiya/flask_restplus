@@ -14,7 +14,7 @@ class Auth:
             # fetch the user data
             user = User.query.filter_by(username=request.json.get('username')).first()
             if user and request.json.get('password'):
-                auth_token = jwt.encode({'public_id': user.id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, Config.SECRET_KEY)
+                auth_token = jwt.encode({'public_id': user.id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(seconds=30)}, Config.SECRET_KEY)
                 if auth_token:
                     print(auth_token)
                     response_object = {

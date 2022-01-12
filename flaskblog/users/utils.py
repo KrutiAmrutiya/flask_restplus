@@ -1,10 +1,12 @@
 import os
 import secrets
 from PIL import Image
-from flask import url_for, current_app
+from flask import url_for, current_app, session
 from flask_mail import Message
 from flaskblog import mail
 from flaskblog.models import Post, User
+import random
+from twilio.rest import Client
 
 
 def save_picture(form_picture):
@@ -56,3 +58,27 @@ def get_all_posts():
 
 def get_a_post(post_id):
     return json_post(Post.query.filter_by(id=post_id).first())
+
+
+
+def generateOtp():
+    return random.randrange(100000, 999999)
+
+
+def getOtpApi(num):
+    account_sid = 'ACe431e8fc8b41c9a97af4e3c2b9d01b0d'
+    auth_token = '2a37dfa3d9050f8e1be197a4215eb35c'
+    client = Client(account_sid, auth_token)
+    otp = generateOtp()
+    body = "Your OTP is " + str(otp)
+    session['response'] = str(otp)
+    message = client.messages \
+        .create(
+            body=body,
+            from_='+19592155506',
+            to=num
+        )
+    if message.sid:
+        return True
+    else:
+        return False
