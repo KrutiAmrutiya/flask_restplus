@@ -2,7 +2,7 @@ from flask import request, Blueprint, jsonify
 from flaskblog import db, bcrypt
 from flaskblog.models import User, token_required
 from .auth_helper import Auth
-from .utils import get_all_users, get_a_user
+from .utils import get_all_users, get_a_user, getOtpApi
 import validators
 from .forms import RegistrationForm
 from flask import session
@@ -45,7 +45,8 @@ def register():
 
 
 @users.route('/users/list', methods=['GET', 'POST'])
-def list_of_all_users():
+@token_required
+def list_of_all_users(a):
     user_list = get_all_users()
     return jsonify(user_list)
 
@@ -187,3 +188,24 @@ def removeFollower(current_user, user_id):
         'message': 'Your follower has been removed!'
     } 
     return response_data
+
+
+@users.route("/users/get_otp", methods=['POST'])
+def get_otp():
+    num = request.json.get('number')
+    val = getOtpApi(num)
+    if val:
+        return jsonify({'message': 'otp sent in your mobile number'})
+
+
+@users.route('/users/validateOtp', methods=['POST'])
+def validateOtp():
+    otp = request.json.get('otp')
+    if 'response' in session:
+        s = session['response']
+        session.pop('response', None)
+        if s == otp:
+            return jsonify({'message': 'You are Authorized, Thank You.'})
+        else:
+            return jsonify({'message': 'You are not Authorized, Sorry!!'})
+    return jsonify({"message": "Sorry, OTP expired please resend the otp."})
