@@ -1,11 +1,12 @@
 from flask import request, Blueprint, jsonify
-from flaskblog import db
+from flaskblog import db, bcrypt
 from flaskblog.models import User, token_required
 from .auth_helper import Auth
 from .utils import get_all_users, get_a_user, getOtpApi
 import validators
 from .forms import RegistrationForm
 from flask import session
+from werkzeug.security import generate_password_hash
 
 users = Blueprint('users', __name__)
 
@@ -32,7 +33,8 @@ def register():
             'message': form.errors
         }
         return response_object
-    new_user = User(username=form.username.data, email=form.email.data, password=form.password.data)
+    hashed_password = generate_password_hash(form.password.data)
+    new_user = User(username=form.username.data, email=form.email.data, password=hashed_password)
     db.session.add(new_user)
     db.session.commit()
     response_object = {

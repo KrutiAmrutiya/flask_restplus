@@ -3,7 +3,7 @@ import os
 
 class Config:
     SECRET_KEY = '70e08850fd508457fbbc861cccbea404'
-    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:postgres@localhost:5432/flask_db'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:postgres@localhost:5432/flaskdb'
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 587
